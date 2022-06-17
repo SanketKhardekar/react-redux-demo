@@ -16,6 +16,20 @@ export const getPosts = createAsyncThunk("posts/getPosts", async (thunkApi) => {
   }
 });
 
+export const deletePost= createAsyncThunk("posts/deletePost", async (id,getState)=>{
+    try {
+        const response= await fetch(`https://jsonplaceholder.typicode.com/posts/${id}`,{
+            method: "DELETE"
+        });
+        if(!response.ok)
+        {
+            throw Error("Something Went Wrong!")
+        }
+        return id;
+    } catch (error) {
+        throw error; 
+    }
+})
 export const addPost=createAsyncThunk("posts/addPost", async(newPost)=>{
     try{
         const response= await fetch("https://jsonplaceholder.typicode.com/posts",{
@@ -65,7 +79,19 @@ const postSlice= createSlice({
         state.posts=[];
         state.isError=action.error.message;
     })
-    
+    builder.addCase(deletePost.pending,(state)=>{
+        state.isLoading=true;
+});
+builder.addCase(deletePost.fulfilled,(state,action)=>{
+    state.isLoading=false;
+    state.posts.splice(action.payload,1);
+    state.isError="";
+})
+builder.addCase(deletePost.rejected,(state,action)=>{
+    state.isLoading=false;
+    state.posts=[];
+    state.isError=action.error.message;
+})
     }
 })
 
